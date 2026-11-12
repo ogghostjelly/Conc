@@ -26,7 +26,7 @@ typedef struct _scope_t scope_t;
 struct _runtime_t
 {
 	uint64_t *stack;
-	uint64_t *heap;
+	uint8_t *heap;
 
 	size_t stack_ptr;
 	size_t heap_ptr;

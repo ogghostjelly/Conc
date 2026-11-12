@@ -41,10 +41,10 @@ runtime_t *create_runtime(operation_t *program)
 	runtime_t *rt = malloc(sizeof(runtime_t));
 
 	rt->stack = malloc(STACK_SIZE * sizeof(uint64_t));
-	rt->heap = malloc(HEAP_SIZE * sizeof(uint64_t));
+	rt->heap = malloc(HEAP_SIZE * sizeof(uint8_t));
 
 	rt->stack_ptr = 0;
-	rt->heap_ptr = 0;
+	rt->heap_ptr = 4; // skip the first qword, addr 0 is reserved for NULL
 	rt->root = program;
 
 	rt->fns = da_create(operation_t);
@@ -200,6 +200,35 @@ void _run_node(runtime_t *r, operation_t opr, scope_t *scope)
 		// Push string address to the stack
 		r->stack[r->stack_ptr] = addr;
 		r->stack_ptr++;
+	} else if(opr.type == OPR_SYSCALL)
+	{
+		operation_t code = da_peek(opr.children, 0, operation_t);
+		if(code.type != OPR_PUSH_INT) {
+			printf("[ERROR] Invalid syscall code.\n");
+			return;
+		}
+
+		size_t c = atol(code.value);
+
+		switch(c)
+		{
+			case 1: {
+				uint64_t rdi = stk_pop(r);
+				uint64_t rdx = stk_pop(r);
+				char *rsi = (char *)&r->heap[stk_pop(r)];
+
+				asm volatile (
+					"syscall"
+					: "+a"(c)
+					: "D"(rdi), "S"(rsi), "d"(rdx)
+					: "rcx", "r11", "memory"
+				);
+				break;
+			}
+			default:
+				printf("[ERROR] Invalid syscall code.\n");
+				return;
+		}
 	}
 }
 
