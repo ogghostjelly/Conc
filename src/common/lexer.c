@@ -300,7 +300,7 @@ int lex_token(lexer_t *lex)
 			lex_number(lex);
 			return 0;
 		}
-		else if(contains("+-*/&^><!%=", c)) {
+		else if(contains("+-*/&^><%=", c)) {
 			lex_operation(lex);
 			return 0;
 		}
