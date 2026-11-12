@@ -11,11 +11,13 @@ char *readFile(char *path, size_t *size)
 	
 	while (1) {
 		if(!buf) return NULL;
-		int bytes_read = fread(&buf[off], 1, *size-1, file);
+		int bytes_read = fread(&buf[off], 1, *size-off-1, file);
 		if(bytes_read == 0) break;
 		off += bytes_read;
 		buf = realloc(buf, *size *= 2);
 	}
+
+	buf[off] = '\0';
 
 	fclose(file);
 	return buf;
