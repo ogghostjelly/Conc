@@ -2,17 +2,21 @@
 
 char *readFile(char *path, size_t *size)
 {
-	FILE *file = fopen(path, "r");
+	FILE *file = !!strcmp(path, "-") ? fopen(path, "r") : stdin;
 	if(!file) return NULL;
 
-	fseek(file, 0, SEEK_END);
-	*size = ftell(file) + 1;
-	fseek(file, 0, SEEK_SET);
-
+	*size = 128;
 	char *buf = malloc(*size);
-	if(!buf) return NULL;
+	size_t off = 0;
+	
+	while (1) {
+		if(!buf) return NULL;
+		int bytes_read = fread(&buf[off], 1, *size-1, file);
+		if(bytes_read == 0) break;
+		off += bytes_read;
+		buf = realloc(buf, *size *= 2);
+	}
 
-	fread(buf, 1, *size-1, file);
 	fclose(file);
 	return buf;
 }
