@@ -107,17 +107,17 @@ void _run_node(runtime_t *r, operation_t opr, scope_t *scope)
 		}
 	} else if(opr.type == OPR_UNARY) {
 		uint64_t a = stk_pop(r);
-		r->stack_ptr += 1;
 
 		switch(opr.value[0]) {
 			case ':':
-				r->stack[r->stack_ptr - 1] = a;
+				r->stack[r->stack_ptr++] = a;
+				r->stack[r->stack_ptr++] = a;
+				break;
+			case '@':
+				r->stack_ptr--;
 				break;
 			case '#':
-				r->stack[r->stack_ptr - 1] = r->heap[a];
-				break;
-			case '$':
-				printf("%c", (char)a);
+				r->stack[r->stack_ptr++] = r->heap[a];
 				break;
 		}
 	} else if(opr.type == OPR_PRINT)
