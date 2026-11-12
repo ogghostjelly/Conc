@@ -119,6 +119,8 @@ void _run_node(runtime_t *r, operation_t opr, scope_t *scope)
 			case '#':
 				r->stack[r->stack_ptr++] = r->heap[a];
 				break;
+			case '!':
+				r->stack[r->stack_ptr++] = !a;
 		}
 	} else if(opr.type == OPR_PRINT)
 	{
