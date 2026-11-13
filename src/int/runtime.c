@@ -212,6 +212,7 @@ void _run_node(runtime_t *r, operation_t opr, scope_t *scope)
 
 		switch(c)
 		{
+			case 0:
 			case 1: {
 				uint64_t rdi = stk_pop(r);
 				uint64_t rdx = stk_pop(r);

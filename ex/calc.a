@@ -1,0 +1,105 @@
+; A calculator in Conc
+; Expressions are evaluation right to left
+; > + 1 * 3 - 5 4
+; is equivalent to
+; > 1 + (3 * (5 - 4))
+
+; Get the length of a string
+proc strlen do -> s
+    ?(s # 0 =) 0
+    ,(s 1 + strlen 1 +)
+end
+
+; Print a string to stdout
+proc puts do -> s
+    s : strlen 1 $1
+end
+
+; Get a line from stdin
+proc getline do
+    "" 1 + _getline
+end
+proc _getline do
+    "" -> buf
+    buf 1 0 $0
+    ?(buf # 10 = 0 =) (_getline)
+end
+
+; Parse the next word in the string
+proc nextword do
+    1 _skip ; skip spaces
+    -> b b
+    0 _skip ; skip word
+    -> e e
+    1 _skip ; skip spaces
+    b e b -
+end
+; Is eof?
+proc cont do
+    1 _skip ; skip spaces
+    : # 0 = 0 =
+end
+; Is the character a space
+proc _isspace do -> s
+     ?(s # 32 =) 1
+    ,?(s # 10 =) 1
+    , 0
+end
+; Skip characters in the string
+proc _skip do -> isspace -> s
+     ?(s # 0 =) (s 1 -)
+    ,?(s _isspace isspace =) (s 1 + isspace _skip)
+    , s
+end
+
+; Compare string slices
+proc strcmp do -> alen -> a -> blen -> b
+    ?(alen blen = 0 =) 0
+    ,(b a alen _strcmp)
+end
+proc _strcmp do -> len -> a -> b
+     ?(len 0 =) 1
+    ,?(b # a # = 0 =) 0
+    , (b 1 + a 1 + len 1 - _strcmp)
+end
+
+proc eval do ?cont _eval end
+proc _eval do
+    cont -> iseof
+
+    ?(iseof 0 =) ("unexpected eof\n" puts)
+    ,(nextword -> wlen -> w
+       ?(w wlen "+" : strlen strcmp) (0 _op)
+      ,?(w wlen "-" : strlen strcmp) (1 _op)
+      ,?(w wlen "*" : strlen strcmp) (2 _op)
+      ,?(w wlen "/" : strlen strcmp) (3 _op)
+      , (w wlen _number))
+end
+
+proc _op do -> opcode -> inp
+    inp
+    _eval -> a
+    _eval -> b
+
+     ?(opcode 0 =) (b a +)
+    ,?(opcode 1 =) (b a -)
+    ,?(opcode 2 =) (b a *)
+    ,?(opcode 3 =) (b a /)
+    , ("unrecognized opcode\n" puts 0)
+end
+
+; Eval a number
+proc _number do parse_num end
+; Parse a string slice into a number
+proc parse_num do -> wlen -> w
+    (w wlen + 1 -) wlen 1 _parse_num
+end
+proc _parse_num do -> p -> wlen -> w
+    ?(wlen 0 =) 0
+    ,((w # 48 - p *)
+      ((w 1 -) (wlen 1 -) (p 10 *) _parse_num)
+      +)
+end
+
+; Get a line, then execute it
+"> " puts getline eval . 0
