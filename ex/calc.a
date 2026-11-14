@@ -1,8 +1,11 @@
 ; A calculator in Conc
-; Expressions are evaluation right to left
-; > + 1 * 3 - 5 4
+; Operators take two arguments from their right.
+; Arguments can be calls to other operators.
+; > + / 3 3 * 3 3
 ; is equivalent to
-; > 1 + (3 * (5 - 4))
+; (+ (/ 3 3) (* 3 3))
+; is equivalent to
+; > (3 / 3) + (3 * 3)
 
 ; Get the length of a string
 proc strlen do -> s
@@ -81,10 +84,10 @@ proc _op do -> opcode -> inp
     _eval -> a
     _eval -> b
 
-     ?(opcode 0 =) (b a +)
-    ,?(opcode 1 =) (b a -)
-    ,?(opcode 2 =) (b a *)
-    ,?(opcode 3 =) (b a /)
+     ?(opcode 0 =) (a b +)
+    ,?(opcode 1 =) (a b -)
+    ,?(opcode 2 =) (a b *)
+    ,?(opcode 3 =) (a b /)
     , ("unrecognized opcode\n" puts 0)
 end
 
